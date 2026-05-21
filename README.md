@@ -53,7 +53,7 @@ Explicitly trigger an installation of a specific version.
 
 ```go
 err := tinygo.Install(
-    tinygo.WithVersion("0.40.1"),
+    tinygo.WithVersion("0.41.1"),
     tinygo.WithInstallDir("/custom/path"),
 )
 ```
