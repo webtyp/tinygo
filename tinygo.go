@@ -7,7 +7,7 @@ import (
 	"runtime"
 )
 
-const DefaultVersion = "0.40.1"
+const DefaultVersion = "0.41.1"
 
 // defaultInstallDir returns the platform-specific install directory,
 // matching the official TinyGo installation instructions at
