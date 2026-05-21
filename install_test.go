@@ -21,7 +21,7 @@ func TestInstall(t *testing.T) {
 
 	gw := gzip.NewWriter(archiveFile)
 	tw := tar.NewWriter(gw)
-	mockBody := "#!/bin/bash\necho \"tinygo version 0.40.1 linux/amd64\"\n"
+	mockBody := "#!/bin/bash\necho \"tinygo version " + DefaultVersion + " linux/amd64\"\n"
 	tw.WriteHeader(&tar.Header{
 		Name: "tinygo/bin/tinygo",
 		Mode: 0755,
