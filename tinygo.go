@@ -2,6 +2,7 @@ package tinygo
 
 import (
 	"net/http"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -19,7 +20,24 @@ func defaultInstallDir(goos string) string {
 	if goos == "windows" {
 		return ""
 	}
-	return "/usr/local"
+	// Fall back to user-local when /usr/local is not writable (e.g. CI non-root runners).
+	if canWriteToDir("/usr/local") {
+		return "/usr/local"
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "/usr/local"
+	}
+	return filepath.Join(home, ".local")
+}
+
+func canWriteToDir(dir string) bool {
+	tmp, err := os.MkdirTemp(dir, ".tinygo-write-check-*")
+	if err != nil {
+		return false
+	}
+	os.Remove(tmp)
+	return true
 }
 
 type config struct {
