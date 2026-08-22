@@ -87,12 +87,26 @@ go test ./...
 
 See [docs/architecture.md](docs/architecture.md) for the full testing strategy and design decisions.
 
-## CI/CD
+## GitHub Actions
 
-Consumers currently install TinyGo with a `go run` step. See
-[docs/github_action.md](docs/github_action.md) for how to ship this as a
-one-line composite action (`uses: tinywasm/tinygo@v0`), what it costs (nothing),
-and the one code change it needs first.
+This repo is also a composite action, so a workflow installs TinyGo in one line
+and gets it on `PATH`:
+
+```yaml
+- uses: actions/setup-go@v5
+  with:
+    go-version-file: 'go.mod'
+- uses: tinywasm/tinygo@v0
+```
+
+| Input | Default | |
+|---|---|---|
+| `version` | `''` | empty uses `DefaultVersion` — leave it empty if the project also runs `sitec`/`goflare` |
+| `cache` | `'true'` | caches the install tree between runs |
+
+Outputs `bindir` and `version`. See
+[docs/github_action.md](docs/github_action.md) for why the version input is a
+trap inside the ecosystem, and how releasing works.
 
 ## License
 

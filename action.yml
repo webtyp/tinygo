@@ -1,0 +1,77 @@
+name: 'Setup TinyGo'
+description: 'Installs TinyGo without admin privileges and puts it on PATH'
+author: 'tinywasm'
+
+branding:
+  icon: 'package'
+  color: 'blue'
+
+inputs:
+  version:
+    description: >-
+      TinyGo version to install, e.g. "0.41.1". Leave empty to use this
+      package's DefaultVersion. Consumers of the tinywasm ecosystem (sitec,
+      goflare) should leave it empty: sitec re-checks the version during the
+      build and reinstalls if it disagrees.
+    required: false
+    default: ''
+  cache:
+    description: 'Cache the TinyGo installation between runs'
+    required: false
+    default: 'true'
+
+outputs:
+  bindir:
+    description: 'Directory containing the tinygo binary, already added to PATH'
+    value: ${{ steps.install.outputs.bindir }}
+  version:
+    description: 'TinyGo version reported by the installed binary'
+    value: ${{ steps.install.outputs.version }}
+
+runs:
+  using: 'composite'
+  steps:
+    # The install tree is cached, not the tarball: a hit then costs neither a
+    # download nor an extraction. Keyed by OS and arch so a matrix job never
+    # restores a macOS tree onto a Linux runner. Windows installs via Scoop,
+    # which manages its own location, so these paths simply miss there.
+    - name: Restore TinyGo cache
+      if: inputs.cache == 'true'
+      uses: actions/cache@v4
+      with:
+        path: |
+          /usr/local/tinygo
+          ~/.local/tinygo
+        key: tinygo-${{ runner.os }}-${{ runner.arch }}-${{ inputs.version || 'default' }}
+
+    - name: Install TinyGo
+      id: install
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        args=(-v)
+        if [ -n "${{ inputs.version }}" ]; then
+          args+=(-version "${{ inputs.version }}")
+        fi
+
+        # Run this action's OWN copy of the installer, not the caller's:
+        # `go run github.com/tinywasm/tinygo/...` would resolve through the
+        # consumer's go.mod, which an ordinary TinyGo project has no reason to
+        # contain — and where it does exist, it could pin a different version
+        # than the ref this action was called with. github.action_path is the
+        # checkout of this repo at that exact ref, with its own go.mod, so the
+        # version is the one the consumer pinned in `uses:`.
+        #
+        # -print-bindir writes the directory and nothing else to stdout; -v logs
+        # go to stderr, so they stay out of the captured value.
+        bindir="$(cd "${{ github.action_path }}" && go run ./cmd/tinygoinstall "${args[@]}" -print-bindir)"
+
+        if [ -z "$bindir" ]; then
+          echo "tinygoinstall returned an empty bin directory" >&2
+          exit 1
+        fi
+
+        echo "$bindir" >> "$GITHUB_PATH"
+        echo "bindir=$bindir" >> "$GITHUB_OUTPUT"
+        echo "version=$("$bindir/tinygo" version)" >> "$GITHUB_OUTPUT"

@@ -1,0 +1,71 @@
+name: Action
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Consumes the action exactly as a stranger would, except with `uses: ./` so
+  # what runs is the working tree of this commit: a broken action.yml fails the
+  # PR that introduced it instead of the first user who pins the tag.
+  consume:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # The action runs `go run`, so Go has to exist first. It deliberately does
+      # not set Go up itself — that would override the version the caller chose.
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - id: tinygo
+        uses: ./
+
+      # The real assertion: a bare `tinygo` resolves only if the action exported
+      # its bin directory to PATH. Checking the step's output alone would pass
+      # even if $GITHUB_PATH was never written.
+      - name: tinygo is on PATH
+        shell: bash
+        run: tinygo version
+
+      - name: outputs are populated
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "bindir:  ${{ steps.tinygo.outputs.bindir }}"
+          echo "version: ${{ steps.tinygo.outputs.version }}"
+          test -n "${{ steps.tinygo.outputs.bindir }}"
+          test -n "${{ steps.tinygo.outputs.version }}"
+
+      # Second run in the same job: proves EnsureInstalled is idempotent and
+      # takes its "already installed" branch instead of downloading again.
+      - name: second run is a no-op
+        uses: ./
+
+      - name: still on PATH after re-run
+        shell: bash
+        run: tinygo version
+
+  # An explicit version must win over DefaultVersion.
+  pinned-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - uses: ./
+        with:
+          version: '0.40.0'
+          cache: 'false'
+      - shell: bash
+        run: |
+          set -euo pipefail
+          tinygo version
+          tinygo version | grep -q '0\.40\.0'

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 
 	"github.com/tinywasm/tinygo"
@@ -12,10 +13,11 @@ import (
 
 func main() {
 	var (
-		version = flag.String("version", tinygo.DefaultVersion, "TinyGo version to install (Linux/macOS only; ignored on Windows via Scoop)")
-		dir     = flag.String("dir", "", "Installation directory (Linux/macOS only; default: /usr/local)")
-		verbose = flag.Bool("v", false, "Verbose output")
-		help    = flag.Bool("h", false, "Show help")
+		version     = flag.String("version", tinygo.DefaultVersion, "TinyGo version to install (Linux/macOS only; ignored on Windows via Scoop)")
+		dir         = flag.String("dir", "", "Installation directory (Linux/macOS only; default: /usr/local)")
+		verbose     = flag.Bool("v", false, "Verbose output")
+		printBinDir = flag.Bool("print-bindir", false, "Print only the bin directory to stdout and exit")
+		help        = flag.Bool("h", false, "Show help")
 	)
 
 	flag.Parse()
@@ -27,9 +29,12 @@ func main() {
 
 	opts := []tinygo.Option{}
 
+	// Logs go to stderr, never stdout: -print-bindir writes a path to stdout
+	// that a shell consumes directly ($(...) into $GITHUB_PATH), so a log line
+	// sharing that stream would be captured as part of the path.
 	if *verbose {
 		opts = append(opts, tinygo.WithLogger(func(msg string) {
-			fmt.Println("[tinygo]", msg)
+			fmt.Fprintln(os.Stderr, "[tinygo]", msg)
 		}))
 	}
 
@@ -45,6 +50,16 @@ func main() {
 	binPath, err := tinygo.EnsureInstalled(opts...)
 	if err != nil {
 		log.Fatalf("error: %v\n", err)
+	}
+
+	// The bin directory is not a fixed path — it depends on whether /usr/local
+	// was writable, and on Windows Scoop picks its own — so a CI step cannot
+	// hardcode what to add to PATH. Deriving it from the resolved binary covers
+	// every branch getPath() can return: the PATH hit, the Scoop shim, and the
+	// local tarball install.
+	if *printBinDir {
+		fmt.Println(filepath.Dir(binPath))
+		return
 	}
 
 	fmt.Printf("✓ TinyGo is ready\n")
@@ -66,7 +81,8 @@ https://tinygo.org/getting-started/install/
 Options:
   -version string   TinyGo version to install, e.g. 0.35.0 (Linux/macOS only, default: %s)
   -dir string       Installation directory (Linux/macOS only, default: /usr/local)
-  -v                Verbose output
+  -v                Verbose output (to stderr)
+  -print-bindir     Print only the bin directory to stdout and exit
   -h                Show this help message
 
 Examples:
@@ -74,5 +90,8 @@ Examples:
   tinygoinstall -dir ~/.local           # Linux/macOS — no sudo, user directory
   sudo tinygoinstall -version 0.35.0    # specific version
   tinygoinstall                         # Windows — uses Scoop, no sudo needed
+
+  # CI: install and export the bin directory to PATH
+  echo "$(tinygoinstall -print-bindir)" >> "$GITHUB_PATH"
 `, tinygo.DefaultVersion)
 }

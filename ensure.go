@@ -1,6 +1,5 @@
 package tinygo
 
-
 func EnsureInstalled(opts ...Option) (string, error) {
 	c := newConfig(opts...)
 
