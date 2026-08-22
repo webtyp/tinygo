@@ -87,6 +87,13 @@ go test ./...
 
 See [docs/architecture.md](docs/architecture.md) for the full testing strategy and design decisions.
 
+## CI/CD
+
+Consumers currently install TinyGo with a `go run` step. See
+[docs/github_action.md](docs/github_action.md) for how to ship this as a
+one-line composite action (`uses: tinywasm/tinygo@v0`), what it costs (nothing),
+and the one code change it needs first.
+
 ## License
 
 MIT
