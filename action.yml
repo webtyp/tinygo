@@ -1,6 +1,6 @@
 name: 'Setup TinyGo'
 description: 'Installs TinyGo without admin privileges and puts it on PATH'
-author: 'tinywasm'
+author: 'webtyp'
 
 branding:
   icon: 'package'
@@ -10,7 +10,7 @@ inputs:
   version:
     description: >-
       TinyGo version to install, e.g. "0.41.1". Leave empty to use this
-      package's DefaultVersion. Consumers of the tinywasm ecosystem (sitec,
+      package's DefaultVersion. Consumers of the webtyp ecosystem (sitec,
       goflare) should leave it empty: sitec re-checks the version during the
       build and reinstalls if it disagrees.
     required: false
@@ -56,7 +56,7 @@ runs:
         fi
 
         # Run this action's OWN copy of the installer, not the caller's:
-        # `go run github.com/tinywasm/tinygo/...` would resolve through the
+        # `go run github.com/webtyp/tinygo/...` would resolve through the
         # consumer's go.mod, which an ordinary TinyGo project has no reason to
         # contain — and where it does exist, it could pin a different version
         # than the ref this action was called with. github.action_path is the

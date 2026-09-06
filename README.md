@@ -1,11 +1,11 @@
 # tinygo
 <img src="docs/img/badges.svg">
 
-Automated TinyGo installer for the `tinywasm` ecosystem. This package provides a standalone, cross-platform (Linux, macOS, Windows) solution to manage TinyGo installations without requiring administrator privileges or user interaction.
+Automated TinyGo installer for the `webtyp` ecosystem. This package provides a standalone, cross-platform (Linux, macOS, Windows) solution to manage TinyGo installations without requiring administrator privileges or user interaction.
 
 ## Features
 
-- **Zero-Admin**: Installs into `~/.tinywasm/tinygo/`, avoiding the need for `sudo`.
+- **Zero-Admin**: Installs into `~/.webtyp/tinygo/`, avoiding the need for `sudo`.
 - **Cross-Platform**: Full support for Linux (amd64/arm64), macOS (amd64/arm64), and Windows (amd64).
 - **Automated**: Handles downloading, extracting (tar.gz/zip), and binary verification.
 - **Unattended**: Designed for CI/CD and developer environment bootstrap.
@@ -14,7 +14,7 @@ Automated TinyGo installer for the `tinywasm` ecosystem. This package provides a
 ## Installation
 
 ```go
-import "github.com/tinywasm/tinygo"
+import "webtyp.com/tinygo"
 ```
 
 ## Usage
@@ -74,7 +74,7 @@ out, err := cmd.CombinedOutput()
 See the [Install Flow diagram](docs/diagrams/install_flow.md) for the full decision tree.
 
 1. **Detection**: Checks if `tinygo` is available in the system `PATH`.
-2. **Fallback**: If not found, checks for a local install at `~/.tinywasm/tinygo/`.
+2. **Fallback**: If not found, checks for a local install at `~/.webtyp/tinygo/`.
 3. **Download**: If missing, downloads the official release from GitHub.
 4. **Extraction**: `.tar.gz` for Linux/macOS, `.zip` for Windows.
 5. **Verification**: Runs `tinygo version` to confirm the binary is functional.
@@ -96,7 +96,7 @@ and gets it on `PATH`:
 - uses: actions/setup-go@v5
   with:
     go-version-file: 'go.mod'
-- uses: tinywasm/tinygo@v0
+- uses: webtyp/tinygo@v0
 ```
 
 | Input | Default | |

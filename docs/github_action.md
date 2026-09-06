@@ -7,7 +7,7 @@ in one line:
 - uses: actions/setup-go@v5
   with:
     go-version-file: 'go.mod'
-- uses: tinywasm/tinygo@v0
+- uses: webtyp/tinygo@v0
 ```
 
 `tinygo` is on `PATH` for every later step.
@@ -58,8 +58,8 @@ That leaves two legitimate sources for the version, one per kind of consumer:
 
 | Consumer | Source of truth | How |
 |---|---|---|
-| Uses `sitec`/`goflare` | its own `go.mod` | `go run github.com/tinywasm/tinygo/cmd/tinygoinstall -print-bindir` |
-| Any other TinyGo project | the action ref | `uses: tinywasm/tinygo@v0` |
+| Uses `sitec`/`goflare` | its own `go.mod` | `go run webtyp.com/tinygo/cmd/tinygoinstall -print-bindir` |
+| Any other TinyGo project | the action ref | `uses: webtyp/tinygo@v0` |
 
 Both are a single source. What must never happen is a version written in the
 workflow *and* another resolved from the module — the two drift, and the
@@ -70,7 +70,7 @@ mismatch branch above is the result.
 **The action runs its own copy of the installer.** The step invokes
 `go run ./cmd/tinygoinstall` from `${{ github.action_path }}` — the checkout of
 this repo at the ref the consumer pinned — not
-`go run github.com/tinywasm/tinygo/...`, which would resolve through the
+`go run webtyp.com/tinygo/...`, which would resolve through the
 *consumer's* `go.mod`. An ordinary TinyGo project has no reason to require this
 module, and a project that does could pin a different version than the `uses:`
 ref. Running from `action_path` makes the ref the only thing that decides.
@@ -103,7 +103,7 @@ guessing a version on their behalf would cost them a debugging session.
 git tag v0.0.12 && git push origin main --tags
 ```
 
-`uses: tinywasm/tinygo@v0.0.12` works the moment the tag lands. Then move the
+`uses: webtyp/tinygo@v0.0.12` works the moment the tag lands. Then move the
 floating major tag, which is what consumers actually pin:
 
 ```bash

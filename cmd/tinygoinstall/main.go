@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/tinywasm/tinygo"
+	"webtyp.com/tinygo"
 )
 
 func main() {

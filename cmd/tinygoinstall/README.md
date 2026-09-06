@@ -6,7 +6,7 @@ https://tinygo.org/getting-started/install/
 ## Installation
 
 ```bash
-go install github.com/tinywasm/tinygo/cmd/tinygoinstall@latest
+go install webtyp.com/tinygo/cmd/tinygoinstall@latest
 ```
 
 ## Permissions

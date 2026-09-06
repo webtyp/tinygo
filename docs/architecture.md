@@ -8,7 +8,7 @@
 | **No package managers** | `apt`, `brew`, `winget` require admin privileges, are platform-specific, and break unattended installs. Tarball/zip is universal and sudo-free. |
 | **No shell modification** | Writing to `~/.bashrc`, `~/.zshrc`, or registry is invasive, requires restart, and breaks CI/Docker. Env is injected at `exec.Command` level via `GetEnv()`. |
 | **Hardcoded default version** | Pinning `DefaultVersion` ensures reproducible installs. Consumers can override with `WithVersion()`. |
-| **Single install path** | `~/.tinywasm/tinygo/` as default avoids conflicts with system installs and is predictable across all tools in the ecosystem. |
+| **Single install path** | `~/.webtyp/tinygo/` as default avoids conflicts with system installs and is predictable across all tools in the ecosystem. |
 
 ## Testing Strategy
 
